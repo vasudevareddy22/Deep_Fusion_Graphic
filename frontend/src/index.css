@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #f0f6ff;
+    color: #1e293b;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Monospace utility for IPs / codes */
+  .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+/* ──────────────────────────── BACKGROUND PATTERNS ─────────────────── */
+.bg-cyber-grid {
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right,  rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+}
+
+/* ──────────────────────────── CARDS / PANELS ───────────────────────── */
+.soc-card {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.04), 0 1px 3px rgba(37, 99, 235, 0.02);
+  color: #1e293b;
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.04);
+  color: #1e293b;
+}
+
+.soc-card-hover {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.soc-card-hover:hover {
+  border-color: #2563eb;
+  box-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.15);
+  transform: translateY(-1px);
+}
+
+/* ──────────────────────────── SAAS GLOWS & ACCENTS ────────────────── */
+.glow-cyan  { box-shadow: 0 4px 20px rgba(37, 99, 235, 0.25); }
+.glow-red   { box-shadow: 0 4px 20px rgba(225, 29, 72, 0.25); }
+.glow-amber { box-shadow: 0 4px 20px rgba(217, 119, 6, 0.25); }
+.glow-green { box-shadow: 0 4px 20px rgba(22, 163, 74, 0.25); }
+
+.text-neon-red   { color: #e11d48; }
+.text-neon-cyan  { color: #2563eb; }
+.text-neon-amber { color: #d97706; }
+.text-neon-green { color: #16a34a; }
+
+/* ──────────────────────────── PULSE DOT ────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+.pulse-dot {
+  width: 9px; height: 9px;
+  background: #16a34a;
+  border-radius: 50%;
+  animation: pulse-dot 1.6s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(22, 163, 74, 0.4);
+}
+
+/* ──────────────────────────── FEED SCROLL ──────────────────────────── */
+@keyframes feed-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.feed-item-enter { animation: feed-in 0.35s ease-out forwards; }
+
+/* ──────────────────────────── SCROLLBAR ────────────────────────────── */
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-track   { background: #f0f6ff; }
+::-webkit-scrollbar-thumb   { background: #bfdbfe; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+
+/* ──────────────────────────── CALENDAR ─────────────────────────────── */
+.cal-day {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 3px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: 1px solid #e0eeff;
+  font-size: 0.7rem;
+  background: #ffffff;
+}
+.cal-day:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+.cal-day.selected { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3); }
+.cal-day.today { border-color: #f59e0b; }
+
+/* ──────────────────────────── BADGES ───────────────────────────────── */
+.badge-critical { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+.badge-high     { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+.badge-medium   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.badge-low      { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* ──────────────────────────── BUTTONS ──────────────────────────────── */
+.btn-cyber {
+  background: #ffffff;
+  border: 1.5px solid #2563eb;
+  color: #2563eb;
+  padding: 0.4rem 0.95rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.1);
+}
+.btn-cyber:hover {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.btn-danger {
+  background: #ffffff;
+  border: 1.5px solid #e11d48;
+  color: #e11d48;
+  padding: 0.4rem 0.95rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-danger:hover {
+  background: #e11d48;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
+}
