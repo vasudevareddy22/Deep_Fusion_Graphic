@@ -13,11 +13,14 @@ class Config:
     FLASK_ENV = os.getenv("FLASK_ENV", "development")
     PORT = int(os.getenv("FLASK_PORT", 5000))
     
-    # Database
-    DB_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "database" / "deepfusionguard.db"))
+    IS_VERCEL = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+
+    # Database: Use /tmp in serverless environments where root filesystem is read-only
+    _default_db = "/tmp/deepfusionguard.db" if IS_VERCEL else str(BASE_DIR / "database" / "deepfusionguard.db")
+    DB_PATH = os.getenv("DATABASE_PATH", _default_db)
     
     # Uploads & Data
-    UPLOAD_FOLDER = str(BASE_DIR / "uploads")
+    UPLOAD_FOLDER = "/tmp/uploads" if IS_VERCEL else str(BASE_DIR / "uploads")
     SAMPLE_DATA_FOLDER = str(BASE_DIR / "sample_data")
     
     # ML & GNN artifacts
@@ -40,10 +43,11 @@ class Config:
     SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", os.getenv("SMTP_USERNAME", "no-reply@deepfusionguard.com"))
     SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
 
-# Ensure required directories exist
+# Ensure required directories exist (safely catch read-only filesystem on serverless runtimes)
 for folder in [
+    Path(Config.UPLOAD_FOLDER),
+    Path(Config.DB_PATH).parent,
     BASE_DIR / "database",
-    BASE_DIR / "uploads",
     BASE_DIR / "sample_data",
     BASE_DIR / "ml",
     BASE_DIR / "gnn",
@@ -54,4 +58,8 @@ for folder in [
     ROOT_DIR / "notebooks",
     ROOT_DIR / "screenshots"
 ]:
-    folder.mkdir(parents=True, exist_ok=True)
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+

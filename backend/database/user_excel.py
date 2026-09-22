@@ -17,9 +17,10 @@ try:
 except ImportError:
     OPENPYXL_AVAILABLE = False
 
-# Excel file location — same directory as this file
+# Excel file location — support /tmp for serverless runtimes
+IS_VERCEL = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 EXCEL_DIR = os.path.dirname(os.path.abspath(__file__))
-EXCEL_PATH = os.path.join(EXCEL_DIR, "registered_users.xlsx")
+EXCEL_PATH = "/tmp/registered_users.xlsx" if IS_VERCEL else os.path.join(EXCEL_DIR, "registered_users.xlsx")
 
 COLUMNS = [
     "User ID",
