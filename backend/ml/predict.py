@@ -50,26 +50,32 @@ class CyberPredictor:
                 probas = self.model.predict_proba(X)
                 
                 results = []
-                for i, row in df.iterrows():
-                    pred_label = preds[i]
+                for idx, (_, row) in enumerate(df.iterrows()):
+                    pred_label = preds[idx]
                     class_idx = list(self.model.classes_).index(pred_label)
-                    confidence = float(probas[i][class_idx])
+                    confidence = float(probas[idx][class_idx])
                     is_attack = 0 if pred_label == 'Normal' else 1
                     
                     proba_dict = {
-                        cls_name: float(probas[i][idx])
-                        for idx, cls_name in enumerate(self.model.classes_)
+                        cls_name: float(probas[idx][c_idx])
+                        for c_idx, cls_name in enumerate(self.model.classes_)
                     }
                     
+                    src = str(row.get('src_ip') or row.get('source_ip') or f"192.168.1.{10 + (idx % 50)}")
+                    dst = str(row.get('dst_ip') or row.get('destination_ip') or "10.0.0.5")
+                    proto = str(row.get('protocol_type') or row.get('protocol') or 'tcp')
+                    srv = str(row.get('service') or 'http')
+
                     results.append({
-                        'attack_type': pred_label,
+                        'attack_type': str(pred_label),
                         'is_attack': is_attack,
                         'confidence': round(confidence, 4),
+                        'ml_confidence': round(confidence, 4),
                         'probabilities': proba_dict,
-                        'source_ip': row.get('src_ip', f"192.168.1.{10 + (i % 50)}"),
-                        'destination_ip': row.get('dst_ip', "10.0.0.5"),
-                        'protocol': str(row.get('protocol_type', 'tcp')),
-                        'service': str(row.get('service', 'http'))
+                        'source_ip': src,
+                        'destination_ip': dst,
+                        'protocol': proto,
+                        'service': srv
                     })
                 return results
             except Exception as e:
@@ -79,18 +85,24 @@ class CyberPredictor:
         return self._heuristic_predict(df)
 
     def _heuristic_predict(self, df: pd.DataFrame):
+        def _to_float(v, default=0.0):
+            try:
+                return float(v)
+            except (ValueError, TypeError):
+                return default
+
         results = []
-        for i, row in df.iterrows():
-            src_ip = row.get('src_ip', f"192.168.1.{10 + (i % 50)}")
-            dst_ip = row.get('dst_ip', "10.0.0.5")
-            proto = str(row.get('protocol_type', 'tcp'))
-            service = str(row.get('service', 'http'))
+        for idx, (_, row) in enumerate(df.iterrows()):
+            src_ip = str(row.get('src_ip') or row.get('source_ip') or f"192.168.1.{10 + (idx % 50)}")
+            dst_ip = str(row.get('dst_ip') or row.get('destination_ip') or "10.0.0.5")
+            proto = str(row.get('protocol_type') or row.get('protocol') or 'tcp')
+            service = str(row.get('service') or 'http')
             
-            count = float(row.get('count', 0))
-            serror = float(row.get('serror_rate', 0.0))
-            failed_logins = float(row.get('num_failed_logins', 0))
-            root_shell = float(row.get('root_shell', 0))
-            diff_srv = float(row.get('diff_srv_rate', 0.0))
+            count = _to_float(row.get('count', 0))
+            serror = _to_float(row.get('serror_rate', 0.0))
+            failed_logins = _to_float(row.get('num_failed_logins', 0))
+            root_shell = _to_float(row.get('root_shell', 0))
+            diff_srv = _to_float(row.get('diff_srv_rate', 0.0))
 
             if root_shell > 0:
                 label = 'U2R'
@@ -115,6 +127,7 @@ class CyberPredictor:
                 'attack_type': label,
                 'is_attack': is_attack,
                 'confidence': round(conf, 4),
+                'ml_confidence': round(conf, 4),
                 'probabilities': probas,
                 'source_ip': src_ip,
                 'destination_ip': dst_ip,
