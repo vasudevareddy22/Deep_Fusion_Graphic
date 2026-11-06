@@ -43,6 +43,12 @@ class Config:
     SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", os.getenv("SMTP_USERNAME", "no-reply@deepfusionguard.com"))
     SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
 
+    # Google OAuth 2.0 Configuration
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:5000/api/auth/google/callback")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
 # Ensure required directories exist (safely catch read-only filesystem on serverless runtimes)
 for folder in [
     Path(Config.UPLOAD_FOLDER),

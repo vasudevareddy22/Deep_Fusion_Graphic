@@ -7,6 +7,7 @@ import { api } from './services/api';
 
 // Pages
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import AttackDetection from './pages/AttackDetection';
 import NetworkGraph from './pages/NetworkGraph';
@@ -39,11 +40,11 @@ const ProtectedLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f6ff] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
       <Navbar onTriggerDemo={handleTriggerDemo} isDemoLoading={isDemoLoading} />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-[#f0f6ff]">
+        <main className="flex-1 overflow-y-auto bg-[#070B14]">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/detect" element={<AttackDetection />} />
@@ -65,6 +66,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/*" element={<ProtectedLayout />} />
       </Routes>
     </Router>

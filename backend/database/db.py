@@ -13,6 +13,10 @@ from backend.config import Config
 DB_FILE = Path(Config.DB_PATH)
 
 def get_db_connection():
+    try:
+        DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
     conn = sqlite3.connect(str(DB_FILE))
     conn.row_factory = sqlite3.Row
     return conn
@@ -22,8 +26,12 @@ def _column_exists(cursor, table: str, column: str) -> bool:
     return any(row[1] == column for row in cursor.fetchall())
 
 def init_db():
-    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
-    conn = get_db_connection()
+    try:
+        DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+    conn = sqlite3.connect(str(DB_FILE))
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     # Users table
@@ -44,10 +52,25 @@ def init_db():
         ("auth_provider", "TEXT DEFAULT 'PASSWORD'"),
         ("organization", "TEXT DEFAULT ''"),
         ("last_login", "TIMESTAMP"),
+        ("google_id", "TEXT DEFAULT ''"),
+        ("google_access_token", "TEXT DEFAULT ''"),
+        ("google_refresh_token", "TEXT DEFAULT ''"),
+        ("google_token_expiry", "TIMESTAMP"),
+        ("google_picture", "TEXT DEFAULT ''"),
     ]
     for col, col_def in new_user_cols:
         if not _column_exists(cursor, "users", col):
             cursor.execute(f"ALTER TABLE users ADD COLUMN {col} {col_def}")
+
+    # OAuth state table for CSRF protection and PKCE
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS oauth_states (
+            state TEXT PRIMARY KEY,
+            code_verifier TEXT NOT NULL,
+            redirect_to TEXT DEFAULT '/login',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
 
     # Detections table
     cursor.execute('''
@@ -87,12 +110,28 @@ def init_db():
         )
     ''')
 
+    # Seed Master Admin User if not present
+    cursor.execute('SELECT id FROM users WHERE LOWER(email) = ?', ('vasudevareddyeevuri@gmail.com',))
+    if not cursor.fetchone():
+        cursor.execute(
+            'INSERT INTO users (email, password, name, role, auth_provider) VALUES (?, ?, ?, ?, ?)',
+            ('vasudevareddyeevuri@gmail.com', 'Admin@2026!', 'Vasudeva Reddy', 'Administrator', 'PASSWORD')
+        )
+
     # Seed Admin User if not present
     cursor.execute('SELECT id FROM users WHERE email = ?', ('admin@deepfusionguard.com',))
     if not cursor.fetchone():
         cursor.execute(
             'INSERT INTO users (email, password, name, role, auth_provider) VALUES (?, ?, ?, ?, ?)',
             ('admin@deepfusionguard.com', 'admin123', 'SOC Chief Commander', 'Administrator', 'PASSWORD')
+        )
+
+    # Seed Demo Operator if not present
+    cursor.execute('SELECT id FROM users WHERE email = ?', ('operator@deepfusionguard.com',))
+    if not cursor.fetchone():
+        cursor.execute(
+            'INSERT INTO users (email, password, name, role, auth_provider) VALUES (?, ?, ?, ?, ?)',
+            ('operator@deepfusionguard.com', 'operator123', 'Senior SOC Analyst', 'Customer', 'PASSWORD')
         )
 
     # Seed realistic initial detection records if empty

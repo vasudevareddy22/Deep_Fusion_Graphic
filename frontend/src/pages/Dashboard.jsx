@@ -40,7 +40,7 @@ import IncidentDeepDiveDialog from '../components/IncidentDeepDiveDialog';
 import EmergencyIsolateModal from '../components/EmergencyIsolateModal';
 import SystemArchitectureGuide from '../components/SystemArchitectureGuide';
 
-// ─── Custom Clean Light SaaS Tooltip ──────────────────────────────────────────
+// ─── Custom Cyber Obsidian SOC Tooltip ──────────────────────────────────────────
 const CyberTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const attacks = payload.find(p => p.dataKey === 'attacks')?.value || 0;
@@ -49,39 +49,39 @@ const CyberTooltip = ({ active, payload, label }) => {
   const bandwidth = (total * 0.42 + (attacks > 0 ? 3.8 : 0.6)).toFixed(1);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 text-xs shadow-xl min-w-[220px] text-slate-800">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2.5">
-        <span className="text-[#5B4EE4] font-bold text-sm">{label}</span>
+    <div className="bg-[#0A0F1D]/95 backdrop-blur-md border border-cyan-500/40 rounded-xl px-4 py-3 text-xs shadow-2xl min-w-[220px] text-slate-100">
+      <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-2.5">
+        <span className="text-cyan-400 font-bold text-sm font-mono">{label}</span>
         {attacks > 0 ? (
-          <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 text-[10px] font-bold border border-rose-200">
+          <span className="px-2 py-0.5 rounded-full bg-rose-950/60 text-rose-300 text-[10px] font-bold border border-rose-600/60 shadow-xs shadow-rose-900/50">
             ATTACK DETECTED
           </span>
         ) : (
-          <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+          <span className="text-[10px] text-emerald-300 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-600/60">
             SECURE FLOW
           </span>
         )}
       </div>
       <div className="space-y-1.5 font-medium">
         <div className="flex items-center justify-between">
-          <span className="text-slate-500">Total Packets:</span>
-          <span className="text-slate-900 font-bold">{total.toLocaleString()}</span>
+          <span className="text-slate-400">Total Packets:</span>
+          <span className="text-white font-bold font-mono">{total.toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-rose-600 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Malicious Spikes:
+          <span className="text-rose-400 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-xs shadow-rose-500" /> Malicious Spikes:
           </span>
-          <span className="text-rose-600 font-bold">{attacks.toLocaleString()}</span>
+          <span className="text-rose-400 font-bold font-mono">{attacks.toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-[#5B4EE4] flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#5B4EE4]" /> Benign Baseline:
+          <span className="text-cyan-400 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-xs shadow-cyan-400" /> Benign Baseline:
           </span>
-          <span className="text-slate-800 font-bold">{normal.toLocaleString()}</span>
+          <span className="text-slate-200 font-bold font-mono">{normal.toLocaleString()}</span>
         </div>
-        <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[11px]">
-          <span className="text-slate-400">Estimated Bandwidth:</span>
-          <span className="text-amber-600 font-bold">{bandwidth} GB/s</span>
+        <div className="flex items-center justify-between pt-1.5 border-t border-slate-800 text-[11px]">
+          <span className="text-slate-500">Estimated Bandwidth:</span>
+          <span className="text-amber-400 font-bold font-mono">{bandwidth} GB/s</span>
         </div>
       </div>
     </div>
@@ -268,7 +268,7 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#f0f6ff] text-slate-800 overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#070B14] text-slate-100 overflow-x-hidden font-sans">
       {/* ── BACKGROUND DASHBOARD (KEPT IN HEAVY BLUR STATE WHEN ALERT IS ACTIVE) ── */}
       <div
         className={`p-4 md:p-6 space-y-6 transition-all duration-500 ease-in-out ${
@@ -278,26 +278,26 @@ export const Dashboard = () => {
         }`}
       >
         {/* ── 1. Top Header Bar ────────────────────────────────────────── */}
-        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-blue-100">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
         {/* App Title & Glowing Pulse Status */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/25 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
             <Activity className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-lg md:text-xl font-extrabold text-slate-900 tracking-tight">
-                Cyber Shield <span className="text-blue-600 font-light">/</span> SOC Operational Dashboard
+              <h1 className="text-lg md:text-xl font-extrabold text-white tracking-tight">
+                Cyber Shield <span className="text-cyan-400 font-light">/</span> SOC Operational Dashboard
               </h1>
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold tracking-wide">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold tracking-wide shadow-xs shadow-emerald-500/20">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 SYSTEM ACTIVE
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 font-medium">
-              <span>DeepFusionGuard Engine</span>
-              <span className="text-slate-300">·</span>
-              <span className="text-blue-600 font-medium">Real-Time Threat Telemetry &amp; Monitoring</span>
+            <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2 font-medium">
+              <span className="text-slate-300">DeepFusionGuard Engine</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-cyan-400 font-mono">Real-Time Multi-Modal Telemetry</span>
             </p>
           </div>
         </div>
@@ -312,12 +312,12 @@ export const Dashboard = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search IP, Port, Threat ID..."
-              className="w-full pl-9 pr-3 py-2 bg-white border border-blue-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 rounded-xl text-xs text-slate-800 placeholder-slate-400 outline-none transition-all shadow-xs"
+              className="w-full pl-9 pr-3 py-2 bg-[#0D1527] border border-slate-800 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none transition-all shadow-inner"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 hover:text-white"
               >
                 Clear
               </button>
@@ -327,17 +327,17 @@ export const Dashboard = () => {
           {/* Re-open System Alert & Guide Button */}
           <button
             onClick={() => setShowAlertModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100/80 border border-amber-300 text-amber-800 text-xs font-bold tracking-wide shadow-xs transition-all cursor-pointer shrink-0 active:scale-95"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-950/40 hover:bg-amber-900/60 border border-amber-600/60 text-amber-300 text-xs font-bold tracking-wide shadow-md shadow-amber-900/20 transition-all cursor-pointer shrink-0 active:scale-95"
             title="View Mandatory System Information Alert Briefing"
           >
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <AlertTriangle className="w-4 h-4 text-amber-400" />
             <span>SYSTEM ALERT &amp; GUIDE</span>
           </button>
 
           {/* Emergency Destructive Button */}
           <button
             onClick={() => setIsIsolateModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold tracking-wider shadow-sm shadow-rose-500/30 transition-all cursor-pointer shrink-0 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold tracking-wider shadow-lg shadow-rose-600/30 transition-all cursor-pointer shrink-0 active:scale-95"
           >
             <AlertOctagon className="w-4 h-4" />
             <span>ISOLATE NETWORK</span>
@@ -347,9 +347,9 @@ export const Dashboard = () => {
 
       {/* Floating Toast Message */}
       {toastMessage && (
-        <div className="p-3 rounded-xl bg-cyan-950/90 border border-[#00F0FF]/60 text-[#00F0FF] text-xs font-mono flex items-center justify-between shadow-xl animate-in slide-in-from-top-2">
+        <div className="p-3 rounded-xl bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 text-xs font-mono flex items-center justify-between shadow-xl animate-in slide-in-from-top-2">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#00E676]" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             {toastMessage}
           </span>
           <button onClick={() => setToastMessage('')} className="text-slate-400 hover:text-white ml-2">×</button>
@@ -359,97 +359,97 @@ export const Dashboard = () => {
       {/* ── 2. Top Metric Cards Grid (4 Columns) ──────────────────────── */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Card 1: Active Threats Count */}
-        <div className="bg-white border border-blue-100/90 rounded-2xl p-5 shadow-xs relative overflow-hidden transition-all hover:border-rose-300 hover:shadow-md group">
+        <div className="soc-card p-5 relative overflow-hidden transition-all hover:border-rose-500/60 hover:shadow-rose-950/40 hover:shadow-xl group">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Active Threats Count
               </p>
-              <h3 className="text-3xl font-black text-slate-900 mt-2 tracking-tight">
-                {kpi.total_attacks.toLocaleString()} <span className="text-sm font-bold text-rose-600">Active</span>
+              <h3 className="text-3xl font-black text-white mt-2 tracking-tight">
+                {kpi.total_attacks.toLocaleString()} <span className="text-sm font-bold text-rose-400">Active</span>
               </h3>
-              <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-rose-600">
+              <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-rose-400">
                 <ArrowUpRight className="w-3.5 h-3.5" />
                 <span>+14.2%</span>
                 <span className="text-slate-400 font-normal">vs previous cycle</span>
               </div>
             </div>
-            <div className="p-3 rounded-2xl bg-rose-50 text-rose-600 group-hover:scale-105 transition-transform">
+            <div className="p-3 rounded-2xl bg-rose-950/60 text-rose-400 border border-rose-800/60 group-hover:scale-105 transition-transform shadow-xs">
               <ShieldAlert className="w-6 h-6" />
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-40" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-60" />
         </div>
 
         {/* Card 2: Attacks Blocked */}
-        <div className="bg-white border border-blue-100/90 rounded-2xl p-5 shadow-xs relative overflow-hidden transition-all hover:border-emerald-300 hover:shadow-md group">
+        <div className="soc-card p-5 relative overflow-hidden transition-all hover:border-emerald-500/60 hover:shadow-emerald-950/40 hover:shadow-xl group">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Attacks Blocked
               </p>
-              <h3 className="text-3xl font-black text-slate-900 mt-2 tracking-tight">
+              <h3 className="text-3xl font-black text-white mt-2 tracking-tight">
                 {(kpi.normal_traffic + 323).toLocaleString()}
               </h3>
               <div className="flex items-center gap-1.5 mt-2">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-700/60 text-emerald-300 text-[11px] font-bold">
                   1,284 Today
                 </span>
                 <span className="text-xs text-slate-400 font-medium">99.8% Accuracy</span>
               </div>
             </div>
-            <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 group-hover:scale-105 transition-transform">
+            <div className="p-3 rounded-2xl bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 group-hover:scale-105 transition-transform shadow-xs">
               <ShieldCheck className="w-6 h-6" />
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-40" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-60" />
         </div>
 
         {/* Card 3: Data Volume Monitored */}
-        <div className="bg-white border border-blue-100/90 rounded-2xl p-5 shadow-xs relative overflow-hidden transition-all hover:border-blue-300 hover:shadow-md group">
+        <div className="soc-card p-5 relative overflow-hidden transition-all hover:border-cyan-500/60 hover:shadow-cyan-950/40 hover:shadow-xl group">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Data Volume Monitored
               </p>
-              <h3 className="text-3xl font-black text-slate-900 mt-2 tracking-tight flex items-baseline gap-1">
-                {liveThroughput} <span className="text-sm font-bold text-blue-600">TB/s</span>
+              <h3 className="text-3xl font-black text-white mt-2 tracking-tight flex items-baseline gap-1">
+                {liveThroughput} <span className="text-sm font-bold text-cyan-400">TB/s</span>
               </h3>
-              <div className="flex items-center gap-2 mt-2 text-xs text-slate-500 font-medium">
-                <span className="text-blue-600 font-bold">{livePacketCount.toLocaleString()}</span>
+              <div className="flex items-center gap-2 mt-2 text-xs text-slate-400 font-medium">
+                <span className="text-cyan-400 font-bold font-mono">{livePacketCount.toLocaleString()}</span>
                 <span>pkts/sec ingest</span>
               </div>
             </div>
-            <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform">
+            <div className="p-3 rounded-2xl bg-cyan-950/60 text-cyan-400 border border-cyan-800/60 group-hover:scale-105 transition-transform shadow-xs">
               <Wifi className="w-6 h-6" />
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-40" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-60" />
         </div>
 
         {/* Card 4: Threat Severity Level */}
-        <div className="bg-white border border-blue-100/90 rounded-2xl p-5 shadow-xs relative overflow-hidden transition-all hover:border-rose-300 hover:shadow-md group">
+        <div className="soc-card p-5 relative overflow-hidden transition-all hover:border-rose-500/60 hover:shadow-rose-950/40 hover:shadow-xl group">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Threat Severity Level
               </p>
               <div className="mt-2.5">
-                <span className="px-3 py-1 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black tracking-wide inline-block">
+                <span className="px-3 py-1 rounded-xl bg-rose-950/70 border border-rose-600/70 text-rose-300 text-xs font-black tracking-wide inline-block shadow-xs shadow-rose-900/60">
                   CRITICAL - LEVEL 4
                 </span>
               </div>
-              <p className="text-xs text-amber-600 mt-2 flex items-center gap-1 font-semibold">
+              <p className="text-xs text-amber-400 mt-2 flex items-center gap-1 font-semibold font-mono">
                 <span>{kpi.critical_threats} Critical Vectors</span>
-                <span className="text-slate-300">·</span>
+                <span className="text-slate-600">·</span>
                 <span>DEFCON 2</span>
               </p>
             </div>
-            <div className="p-3 rounded-2xl bg-rose-50 text-rose-600 group-hover:scale-105 transition-transform">
+            <div className="p-3 rounded-2xl bg-rose-950/60 text-rose-400 border border-rose-800/60 group-hover:scale-105 transition-transform shadow-xs">
               <AlertTriangle className="w-6 h-6" />
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-40" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-60" />
         </div>
       </section>
 
@@ -458,30 +458,30 @@ export const Dashboard = () => {
 
         {/* ── LEFT PANEL (2/3): Interactive Recharts & Traffic Visualization ── */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white border border-blue-100/90 rounded-2xl p-5 shadow-xs">
+          <div className="soc-card p-5">
             {/* Chart Toolbar: Timeframe Selector & Calendar Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-blue-50">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800/80">
               <div>
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-blue-600" />
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-cyan-400" />
                   Real-Time Network Packet Traffic
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                <p className="text-xs text-slate-400 mt-0.5 font-medium">
                   Visualizing ingress traffic velocity and high-volume malicious packet spikes
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 {/* Timeframe Selector Tabs (Day, Week, Month, Year) */}
-                <div className="flex items-center bg-blue-50/60 border border-blue-100 rounded-xl p-1 text-xs">
+                <div className="flex items-center bg-[#070B14] border border-slate-800 rounded-xl p-1 text-xs">
                   {['day', 'week', 'month', 'year'].map((p) => (
                     <button
                       key={p}
                       onClick={() => setPeriod(p)}
                       className={`px-3 py-1 rounded-lg uppercase font-bold transition-all cursor-pointer ${
                         period === p
-                          ? 'bg-blue-600 text-white shadow-xs'
-                          : 'text-slate-500 hover:text-slate-800'
+                          ? 'bg-blue-600 text-white shadow-xs shadow-blue-500/40'
+                          : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
                       {p}
@@ -494,12 +494,12 @@ export const Dashboard = () => {
                   onClick={() => setShowCalendar(prev => !prev)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                     showCalendar
-                      ? 'bg-blue-50 border-blue-600 text-blue-600'
-                      : 'bg-white border-blue-100 text-slate-600 hover:border-blue-200'
+                      ? 'bg-cyan-950/60 border-cyan-500 text-cyan-300 shadow-xs shadow-cyan-500/30'
+                      : 'bg-[#0D1527] border-slate-800 text-slate-300 hover:border-slate-700'
                   }`}
                   title="Toggle Day-by-Day Database Calendar"
                 >
-                  <CalendarIcon className="w-3.5 h-3.5 text-blue-600" />
+                  <CalendarIcon className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Calendar</span>
                   {showCalendar ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
@@ -509,8 +509,8 @@ export const Dashboard = () => {
                   onClick={() => setIsLiveStreaming(prev => !prev)}
                   className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
                     isLiveStreaming
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-700 shadow-xs'
-                      : 'bg-slate-100 border-slate-200 text-slate-400'
+                      ? 'bg-emerald-950/60 border-emerald-500/60 text-emerald-300 shadow-xs shadow-emerald-500/20'
+                      : 'bg-slate-900 border-slate-800 text-slate-500'
                   }`}
                   title={isLiveStreaming ? "Live 3s Telemetry Active" : "Telemetry Paused"}
                 >
@@ -521,13 +521,13 @@ export const Dashboard = () => {
 
             {/* Expandable Database Calendar Heatmap Section */}
             {showCalendar && (
-              <div className="pt-4 pb-2 border-b border-slate-100 animate-in slide-in-from-top-3">
+              <div className="pt-4 pb-2 border-b border-slate-800/80 animate-in slide-in-from-top-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <Radio className="w-3.5 h-3.5 text-[#5B4EE4] animate-pulse" />
+                  <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5 font-mono">
+                    <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
                     SELECT DAY FROM DATABASE TO INSPECT TELEMETRY
                   </span>
-                  <span className="text-[11px] font-bold text-[#5B4EE4]">
+                  <span className="text-[11px] font-bold text-cyan-300 font-mono">
                     Selected: {selectedDate}
                   </span>
                 </div>
@@ -548,26 +548,26 @@ export const Dashboard = () => {
                   <defs>
                     {/* Crimson spike gradient for attack spikes */}
                     <linearGradient id="cyberSpikes" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#e11d48" stopOpacity={0.6} />
-                      <stop offset="95%" stopColor="#e11d48" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.7} />
+                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
                     </linearGradient>
-                    {/* Blue baseline for normal packets */}
+                    {/* Electric Sapphire baseline for normal packets */}
                     <linearGradient id="cyberNormal" x1="0" y1="0" x2="0" y2="1">
-                       <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
-                       <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
+                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.45} />
+                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
 
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                   <XAxis
                     dataKey="label"
-                    tick={{ fill: '#64748B', fontSize: 11 }}
-                    axisLine={{ stroke: '#e2e8f0' }}
+                    tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    axisLine={{ stroke: '#334155' }}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fill: '#64748B', fontSize: 11 }}
-                    axisLine={{ stroke: '#e2e8f0' }}
+                    tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    axisLine={{ stroke: '#334155' }}
                     tickLine={false}
                   />
                   <Tooltip content={<CyberTooltip />} />
@@ -577,7 +577,7 @@ export const Dashboard = () => {
                     type="monotone"
                     dataKey="normal"
                     name="Benign Baseline"
-                    stroke="#2563eb"
+                    stroke="#3b82f6"
                     strokeWidth={2}
                     fill="url(#cyberNormal)"
                     dot={false}
@@ -588,31 +588,31 @@ export const Dashboard = () => {
                     type="monotone"
                     dataKey="attacks"
                     name="Attack Spikes"
-                    stroke="#e11d48"
+                    stroke="#f43f5e"
                     strokeWidth={2.5}
                     fill="url(#cyberSpikes)"
-                    dot={{ stroke: '#e11d48', strokeWidth: 2, r: 3, fill: '#ffffff' }}
-                    activeDot={{ r: 6, fill: '#e11d48', stroke: '#ffffff', strokeWidth: 2 }}
+                    dot={{ stroke: '#f43f5e', strokeWidth: 2, r: 3, fill: '#ffffff' }}
+                    activeDot={{ r: 6, fill: '#f43f5e', stroke: '#ffffff', strokeWidth: 2 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
 
               {/* Chart Legend & Status Bar */}
-              <div className="flex flex-wrap items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500 font-medium">
+              <div className="flex flex-wrap items-center justify-between pt-3 border-t border-slate-800 text-xs text-slate-400 font-medium">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-3 h-1 bg-rose-500 rounded-full inline-block" />
-                    <span className="text-rose-600 font-bold">Malicious Packet Spikes</span>
+                    <span className="w-3 h-1 bg-rose-500 rounded-full inline-block shadow-xs shadow-rose-500" />
+                    <span className="text-rose-400 font-bold">Malicious Packet Spikes</span>
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-3 h-1 bg-blue-600 rounded-full inline-block" />
-                    <span className="text-blue-600 font-semibold">Benign Network Flow</span>
+                    <span className="w-3 h-1 bg-blue-500 rounded-full inline-block shadow-xs shadow-blue-500" />
+                    <span className="text-blue-400 font-semibold">Benign Network Flow</span>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-slate-400">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Auto-Refresh: {isLiveStreaming ? <span className="text-emerald-600 font-bold">STREAMING</span> : <span className="text-slate-400">PAUSED</span>}</span>
+                  <span>Auto-Refresh: {isLiveStreaming ? <span className="text-emerald-400 font-bold">STREAMING</span> : <span className="text-slate-500">PAUSED</span>}</span>
                 </div>
               </div>
             </div>
@@ -621,49 +621,49 @@ export const Dashboard = () => {
           {/* Quick Navigation Action Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Attack Detection Pipeline', path: '/detect', icon: ShieldAlert, color: 'border-blue-100 text-slate-800 hover:border-rose-300 hover:bg-rose-50/50' },
-              { label: 'Interactive Network Graph', path: '/graph', icon: Layers, color: 'border-blue-100 text-slate-800 hover:border-blue-300 hover:bg-blue-50/50' },
-              { label: 'AI Threat Explainer', path: '/analysis', icon: Cpu, color: 'border-blue-100 text-slate-800 hover:border-indigo-300 hover:bg-indigo-50/50' },
-              { label: 'Audit Reports & CSV Export', path: '/reports', icon: Activity, color: 'border-blue-100 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/50' },
+              { label: 'Attack Detection Pipeline', path: '/detect', icon: ShieldAlert, color: 'hover:border-rose-500/50 hover:bg-rose-950/20' },
+              { label: 'Interactive Network Graph', path: '/graph', icon: Layers, color: 'hover:border-cyan-500/50 hover:bg-cyan-950/20' },
+              { label: 'AI Threat Explainer', path: '/analysis', icon: Cpu, color: 'hover:border-indigo-500/50 hover:bg-indigo-950/20' },
+              { label: 'Audit Reports & CSV Export', path: '/reports', icon: Activity, color: 'hover:border-emerald-500/50 hover:bg-emerald-950/20' },
             ].map((nav) => (
               <button
                 key={nav.path}
                 onClick={() => navigate(nav.path)}
-                className={`p-3.5 rounded-2xl bg-white border ${nav.color} transition-all flex items-center justify-between text-xs font-bold cursor-pointer group hover:shadow-xs`}
+                className={`p-3.5 rounded-2xl soc-card ${nav.color} transition-all flex items-center justify-between text-xs font-bold cursor-pointer group hover:shadow-lg`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <nav.icon className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span className="truncate">{nav.label}</span>
+                  <nav.icon className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <span className="truncate text-slate-200">{nav.label}</span>
                 </div>
-                <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
             ))}
           </div>
         </div>
 
         {/* ── RIGHT PANEL (1/3): Live Attack Stream Feed ─────────────────── */}
-        <div className="bg-white border border-blue-100/90 rounded-2xl p-5 shadow-xs flex flex-col h-[580px]">
+        <div className="soc-card p-5 flex flex-col h-[580px]">
           {/* Stream Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-              <h2 className="text-sm font-extrabold text-slate-900 tracking-wide uppercase">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shadow-xs shadow-rose-500" />
+              <h2 className="text-sm font-extrabold text-white tracking-wide uppercase">
                 Live Attack Stream Feed
               </h2>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-600">
+            <span className="px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-300 font-mono">
               {filteredThreatLogs.length} Events
             </span>
           </div>
 
           {/* Subheader info */}
-          <div className="flex items-center justify-between py-2 text-[10px] font-bold text-slate-400 border-b border-slate-100">
+          <div className="flex items-center justify-between py-2 text-[10px] font-bold text-slate-400 border-b border-slate-800/80 font-mono">
             <span>SEVERITY / VECTOR</span>
             <span>SOURCE &amp; ACTION</span>
           </div>
 
           {/* Scrolling Feed Container */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 pr-1 space-y-1 mt-1">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60 pr-1 space-y-1 mt-1">
             {filteredThreatLogs.length > 0 ? (
               filteredThreatLogs.map((log, idx) => {
                 const isBlocked = blockedIps.has(log.source_ip);
@@ -673,7 +673,7 @@ export const Dashboard = () => {
                 return (
                   <div
                     key={`${log.id}-${idx}`}
-                    className="p-3 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-200/80 cursor-pointer group relative"
+                    className="p-3 rounded-xl hover:bg-slate-800/40 transition-all border border-transparent hover:border-slate-700/80 cursor-pointer group relative"
                     onClick={() => handleOpenIncident(log)}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -681,19 +681,19 @@ export const Dashboard = () => {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                            isCritical ? 'bg-rose-50 text-rose-700 border border-rose-200' :
-                            isHigh ? 'bg-amber-50 text-amber-800 border border-amber-200' :
-                            'bg-purple-50 text-purple-700 border border-purple-200'
+                            isCritical ? 'bg-rose-950/70 text-rose-300 border border-rose-700/60 shadow-xs' :
+                            isHigh ? 'bg-amber-950/70 text-amber-300 border border-amber-700/60' :
+                            'bg-purple-950/70 text-purple-300 border border-purple-700/60'
                           }`}>
                             {log.severity || 'HIGH'}
                           </span>
-                          <span className="text-xs font-bold text-slate-800 truncate">
+                          <span className="text-xs font-bold text-slate-100 truncate">
                             {log.attack_type || 'Attack Vector'}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-                          <span className="text-rose-600 font-bold">{log.source_ip}</span>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+                          <span className="text-rose-400 font-bold">{log.source_ip}</span>
                           <span>→</span>
                           <span>Port {log.port || 80}</span>
                         </div>
@@ -701,24 +701,24 @@ export const Dashboard = () => {
 
                       {/* Right: Timestamp & Action Buttons */}
                       <div className="flex flex-col items-end gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-                        <span className="text-[10px] font-mono text-slate-500">
+                        <span className="text-[10px] font-mono text-slate-400">
                           {log.timestamp ? String(log.timestamp).split(' ')[1] || String(log.timestamp) : '10:32:05'}
                         </span>
 
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleOpenIncident(log)}
-                            className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[#00F0FF] text-[10px] font-mono font-semibold transition-colors cursor-pointer"
+                            className="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 text-[10px] font-mono font-semibold transition-colors cursor-pointer border border-slate-700 hover:border-cyan-500/50"
                           >
                             Mitigate
                           </button>
                           <button
                             onClick={() => handleBlockIp(log.source_ip)}
                             disabled={isBlocked}
-                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold transition-colors cursor-pointer ${
+                            className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-semibold transition-colors cursor-pointer ${
                               isBlocked
                                 ? 'bg-red-950/40 text-red-500 border border-red-900 cursor-not-allowed'
-                                : 'bg-red-950/70 hover:bg-red-900/90 text-[#FF2A5F] border border-red-800'
+                                : 'bg-red-950/70 hover:bg-red-900/90 text-rose-300 border border-red-700 hover:border-rose-500'
                             }`}
                           >
                             {isBlocked ? 'Blocked' : 'Block IP'}
@@ -730,22 +730,22 @@ export const Dashboard = () => {
                 );
               })
             ) : (
-              <div className="flex flex-col items-center justify-center h-48 text-slate-500 font-mono text-xs">
-                <ShieldCheck className="w-8 h-8 text-slate-600 mb-2" />
+              <div className="flex flex-col items-center justify-center h-48 text-slate-400 font-mono text-xs">
+                <ShieldCheck className="w-8 h-8 text-slate-500 mb-2" />
                 <p>No active incidents match query</p>
               </div>
             )}
           </div>
 
           {/* Feed Footer */}
-          <div className="pt-3 border-t border-[#1F2937] flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+          <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               Ingest: 3s cadence
             </span>
             <button
               onClick={() => navigate('/history')}
-              className="text-[#00F0FF] hover:underline cursor-pointer"
+              className="text-cyan-400 hover:underline cursor-pointer"
             >
               Full Telemetry Archive →
             </button>

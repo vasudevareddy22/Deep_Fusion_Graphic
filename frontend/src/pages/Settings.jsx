@@ -198,6 +198,80 @@ export const Settings = () => {
           </div>
         </div>
 
+        {/* Google Account Connection Management */}
+        <div className="glass-card p-5 rounded-xl border border-slate-800 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h3 className="text-sm font-bold font-mono text-slate-200 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                Google Account Integration
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Manage your connected Google Workspace or personal Google account with token revocation.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full border bg-cyan-950/60 border-cyan-800 text-cyan-400">
+              OAuth 2.0 PKCE
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.8 7.3l3.7 2.9C6.4 7.2 8.9 5 12 5z"/>
+                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5.1 3.7-8.8z"/>
+                  <path fill="#FBBC05" d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.8 0-1.2.2-2 .4-2.8L1.8 6.3C.7 8.5 0 10.7 0 12s.7 3.5 1.8 5.7l3.7-2.9z"/>
+                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.6-2.2-6.5-5.2L1.8 16C3.7 20.4 7.5 23 12 23z"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-200">Google OAuth Authorization Flow</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Prompts Google's official account chooser with <code className="text-[#00E5D9]">prompt=select_account</code>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await api.getGoogleAuthUrl('/settings');
+                    if (res?.auth_url && res.client_id_configured) {
+                      window.location.href = res.auth_url;
+                    } else {
+                      alert('Google OAuth credentials not configured in backend/.env yet.');
+                    }
+                  } catch (e) {
+                    alert('Could not initialize Google connection flow.');
+                  }
+                }}
+                className="px-3.5 py-2 rounded-lg text-xs font-bold bg-[#111723] hover:bg-[#162032] border border-[#00E5D9]/40 hover:border-[#00E5D9] text-[#00E5D9] transition-all cursor-pointer shadow-xs"
+              >
+                Connect Google Account
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (confirm('Disconnect Google account and revoke access tokens?')) {
+                    try {
+                      await api.disconnectGoogle();
+                      alert('Google account disconnected and tokens revoked.');
+                    } catch (e) {
+                      alert('Could not disconnect Google account.');
+                    }
+                  }
+                }}
+                className="px-3.5 py-2 rounded-lg text-xs font-bold bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 transition-all cursor-pointer"
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Save Button */}
         <div className="flex justify-end">
           <button

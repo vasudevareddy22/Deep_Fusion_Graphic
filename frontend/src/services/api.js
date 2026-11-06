@@ -47,9 +47,27 @@ export const api = {
     return res.data;
   },
 
-  /** Google OAuth profile payload — creates/logs in customer */
+  /** Google OAuth profile payload — creates/logs in customer (fallback) */
   googleAuth: async (payload) => {
     const res = await client.post('/auth/google', payload);
+    return res.data;
+  },
+
+  /** Get official Google OAuth 2.0 authorization URL with prompt=select_account */
+  getGoogleAuthUrl: async (returnTo = '/login') => {
+    const res = await client.get(`/auth/google/url?return_to=${encodeURIComponent(returnTo)}`);
+    return res.data;
+  },
+
+  /** Disconnect Google account and revoke access token */
+  disconnectGoogle: async () => {
+    const res = await client.post('/auth/google/disconnect');
+    return res.data;
+  },
+
+  /** Check if current user has connected Google account */
+  getGoogleStatus: async () => {
+    const res = await client.get('/auth/google/status');
     return res.data;
   },
 

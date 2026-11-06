@@ -1,12 +1,18 @@
 import sys
 import hashlib
+import secrets
+import base64
+import urllib.parse
+from datetime import datetime, timedelta
 from pathlib import Path
+import requests
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file, redirect
+from backend.config import Config
 from backend.database.db import get_db_connection
 from backend.services.otp_service import generate_otp, verify_otp
 from backend.database.user_excel import (
@@ -207,11 +213,304 @@ def verify_otp_route():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# POST /api/auth/google
+# GOOGLE OAUTH 2.0 AUTHORIZATION CODE FLOW (OFFICIAL ACCOUNT CHOOSER)
 # ─────────────────────────────────────────────────────────────────────────────
+
+def _generate_code_verifier_and_challenge():
+    """Generate PKCE code_verifier and code_challenge (S256)."""
+    verifier = secrets.token_urlsafe(64)
+    digest = hashlib.sha256(verifier.encode('ascii')).digest()
+    challenge = base64.urlsafe_b64encode(digest).decode('ascii').rstrip('=')
+    return verifier, challenge
+
+
+@auth_bp.route('/api/auth/google/url', methods=['GET'])
+def google_auth_url():
+    """
+    Generate the official Google OAuth authorization URL.
+    Uses prompt=select_account so Google displays its official account chooser
+    even when sessions exist in the browser, without forcing consent repeatedly.
+    """
+    client_id = Config.GOOGLE_CLIENT_ID or ''
+    redirect_uri = Config.GOOGLE_REDIRECT_URI or 'http://localhost:5000/api/auth/google/callback'
+    return_to = request.args.get('return_to', '/login')
+
+    # Security: Generate CSRF state and PKCE verifier/challenge
+    state = secrets.token_urlsafe(32)
+    verifier, challenge = _generate_code_verifier_and_challenge()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Cleanup old states (>15 mins)
+    cursor.execute("DELETE FROM oauth_states WHERE created_at < datetime('now', '-15 minutes')")
+    cursor.execute(
+        "INSERT OR REPLACE INTO oauth_states (state, code_verifier, redirect_to) VALUES (?, ?, ?)",
+        (state, verifier, return_to)
+    )
+    conn.commit()
+    conn.close()
+
+    # Required minimal scopes: openid, email, profile
+    scopes = 'openid email profile'
+
+    # Official Google OAuth 2.0 Auth URL with prompt=select_account
+    params = {
+        'client_id': client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': scopes,
+        'state': state,
+        'access_type': 'offline',
+        'prompt': 'select_account',
+        'code_challenge': challenge,
+        'code_challenge_method': 'S256',
+        'include_granted_scopes': 'true',
+    }
+    google_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + urllib.parse.urlencode(params)
+
+    return jsonify({
+        'auth_url': google_url,
+        'configured': bool(client_id),
+        'client_id_configured': bool(client_id)
+    }), 200
+
+
+@auth_bp.route('/auth/google', methods=['GET'])
+@auth_bp.route('/api/auth/google', methods=['GET'])
+def google_auth_redirect():
+    """Direct browser GET redirect to Google's official account chooser."""
+    client_id = Config.GOOGLE_CLIENT_ID or ''
+    redirect_uri = Config.GOOGLE_REDIRECT_URI or 'http://localhost:5000/api/auth/google/callback'
+    return_to = request.args.get('return_to', '/login')
+
+    if not client_id:
+        frontend_url = Config.FRONTEND_URL.rstrip('/')
+        return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote(
+            "Google OAuth is not configured on the server yet. Please add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to backend/.env."
+        ))
+
+    state = secrets.token_urlsafe(32)
+    verifier, challenge = _generate_code_verifier_and_challenge()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM oauth_states WHERE created_at < datetime('now', '-15 minutes')")
+    cursor.execute(
+        "INSERT OR REPLACE INTO oauth_states (state, code_verifier, redirect_to) VALUES (?, ?, ?)",
+        (state, verifier, return_to)
+    )
+    conn.commit()
+    conn.close()
+
+    params = {
+        'client_id': client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'state': state,
+        'access_type': 'offline',
+        'prompt': 'select_account',
+        'code_challenge': challenge,
+        'code_challenge_method': 'S256',
+        'include_granted_scopes': 'true',
+    }
+    return redirect('https://accounts.google.com/o/oauth2/v2/auth?' + urllib.parse.urlencode(params))
+
+
+@auth_bp.route('/api/auth/google/callback', methods=['GET'])
+def google_auth_callback():
+    """
+    Google OAuth 2.0 redirect callback.
+    Validates state, handles access_denied, exchanges code with PKCE,
+    fetches verified user profile, creates/logs in user, and redirects to frontend with session.
+    """
+    frontend_url = Config.FRONTEND_URL.rstrip('/')
+
+    # Check for error returned by Google (e.g. access_denied when user clicks Cancel)
+    error = request.args.get('error')
+    if error:
+        error_desc = request.args.get('error_description', 'Authorization was canceled or denied by the user.')
+        return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote(f"Google: {error} ({error_desc})"))
+
+    code = request.args.get('code')
+    state = request.args.get('state')
+
+    if not code or not state:
+        return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote("Missing OAuth authorization code or state."))
+
+    # Validate state and retrieve PKCE verifier
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    state_row = cursor.execute("SELECT * FROM oauth_states WHERE state = ?", (state,)).fetchone()
+    if not state_row:
+        conn.close()
+        return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote("Invalid or expired OAuth state (CSRF verification failed)."))
+
+    code_verifier = state_row['code_verifier']
+    target_redirect = state_row['redirect_to'] or '/login'
+    cursor.execute("DELETE FROM oauth_states WHERE state = ?", (state,))
+    conn.commit()
+
+    # Exchange authorization code for tokens via Google Token Endpoint
+    token_url = 'https://oauth2.googleapis.com/token'
+    token_payload = {
+        'client_id': Config.GOOGLE_CLIENT_ID,
+        'client_secret': Config.GOOGLE_CLIENT_SECRET,
+        'code': code,
+        'code_verifier': code_verifier,
+        'grant_type': 'authorization_code',
+        'redirect_uri': Config.GOOGLE_REDIRECT_URI,
+    }
+
+    try:
+        token_resp = requests.post(token_url, data=token_payload, timeout=15)
+        if token_resp.status_code != 200:
+            err_body = token_resp.text
+            conn.close()
+            return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote(f"Token exchange failed: {err_body}"))
+        token_data = token_resp.json()
+    except Exception as e:
+        conn.close()
+        return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote(f"Network error contacting Google: {str(e)}"))
+
+    access_token = token_data.get('access_token')
+    refresh_token = token_data.get('refresh_token', '')
+    expires_in = token_data.get('expires_in', 3600)
+
+    # Fetch user profile using the access token
+    try:
+        userinfo_resp = requests.get(
+            'https://www.googleapis.com/oauth2/v3/userinfo',
+            headers={'Authorization': f'Bearer {access_token}'},
+            timeout=15
+        )
+        if userinfo_resp.status_code != 200:
+            conn.close()
+            return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote("Failed to retrieve Google user profile."))
+        profile = userinfo_resp.json()
+    except Exception as e:
+        conn.close()
+        return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote(f"Profile fetch error: {str(e)}"))
+
+    email = (profile.get('email') or '').strip().lower()
+    name = (profile.get('name') or profile.get('given_name') or 'Google User').strip()
+    google_id = str(profile.get('sub') or '')
+    picture = profile.get('picture', '')
+
+    if not email:
+        conn.close()
+        return redirect(f"{frontend_url}/login?oauth_error=" + urllib.parse.quote("No email provided in Google profile."))
+
+    # Store user in database with tokens securely preserved on backend
+    user = _get_or_create_user(conn, email, name, 'GOOGLE', role='Customer', password_hash=google_id)
+    expiry_time = (datetime.utcnow() + timedelta(seconds=expires_in)).isoformat()
+
+    update_query = """
+        UPDATE users
+        SET google_id = ?,
+            google_access_token = ?,
+            google_picture = ?,
+            google_token_expiry = ?
+    """
+    params = [google_id, access_token, picture, expiry_time]
+    if refresh_token:
+        update_query += ", google_refresh_token = ?"
+        params.append(refresh_token)
+    update_query += " WHERE id = ?"
+    params.append(user['id'])
+
+    cursor.execute(update_query, tuple(params))
+    conn.commit()
+    conn.close()
+
+    # Excel audit log
+    if not user_exists(email):
+        log_registration(name=name, identifier=email, auth_method='GOOGLE', role='Customer')
+    else:
+        log_login(email)
+
+    # Issue application JWT session token
+    app_token = _make_token(user['id'], email)
+
+    # Redirect to frontend with successful auth query parameters
+    user_payload_str = urllib.parse.quote(jsonify_safe_str := f'{{"id":{user["id"]},"email":"{email}","name":"{name}","role":"{user.get("role","Customer")}","auth_provider":"GOOGLE","picture":"{picture}"}}')
+    redirect_target = f"{frontend_url}/login?oauth_success=1&token={app_token}&user={user_payload_str}"
+    return redirect(redirect_target)
+
+
+@auth_bp.route('/api/auth/google/disconnect', methods=['POST'])
+def disconnect_google():
+    """
+    Disconnects the user's Google account:
+    Revokes the stored Google access token with Google's revocation endpoint
+    and clears the tokens from the database.
+    """
+    email = _resolve_requester_email()
+    if not email:
+        return jsonify({'error': 'Unauthorized. Please sign in.'}), 401
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    row = cursor.execute("SELECT id, google_access_token, google_refresh_token FROM users WHERE LOWER(email) = ?", (email.lower(),)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({'error': 'User not found.'}), 404
+
+    token_to_revoke = row['google_access_token'] or row['google_refresh_token']
+    if token_to_revoke:
+        try:
+            requests.post(
+                'https://oauth2.googleapis.com/revoke',
+                params={'token': token_to_revoke},
+                headers={'content-type': 'application/x-www-form-urlencoded'},
+                timeout=10
+            )
+        except Exception:
+            pass  # Even if remote revocation fails (expired), clear locally
+
+    cursor.execute("""
+        UPDATE users
+        SET google_access_token = '',
+            google_refresh_token = '',
+            google_token_expiry = NULL,
+            google_id = ''
+        WHERE id = ?
+    """, (row['id'],))
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        'success': True,
+        'message': 'Google account disconnected and tokens revoked successfully.'
+    }), 200
+
+
+@auth_bp.route('/api/auth/google/status', methods=['GET'])
+def google_connection_status():
+    """Check if the currently authenticated user has a connected Google account."""
+    email = _resolve_requester_email()
+    if not email:
+        return jsonify({'connected': False, 'configured': bool(Config.GOOGLE_CLIENT_ID)}), 200
+
+    conn = get_db_connection()
+    row = conn.execute("SELECT google_id, google_access_token, google_token_expiry, google_picture FROM users WHERE LOWER(email) = ?", (email.lower(),)).fetchone()
+    conn.close()
+
+    if not row or not row['google_id']:
+        return jsonify({'connected': False, 'configured': bool(Config.GOOGLE_CLIENT_ID)}), 200
+
+    return jsonify({
+        'connected': True,
+        'configured': bool(Config.GOOGLE_CLIENT_ID),
+        'picture': row['google_picture'] or '',
+        'expires_at': row['google_token_expiry'] or ''
+    }), 200
+
+
+# Keep POST /api/auth/google for backward compatibility if any legacy payload is sent
 @auth_bp.route('/api/auth/google', methods=['POST'])
 def google_auth():
-    """Simulate Google OAuth — accepts profile payload from the frontend."""
+    """Simulate or profile payload fallback for Google auth."""
     data = request.get_json() or {}
     email = (data.get('email') or '').strip().lower()
     name = (data.get('name') or 'Google User').strip()
