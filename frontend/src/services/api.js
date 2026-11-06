@@ -143,8 +143,28 @@ export const api = {
     const res = await client.post('/explain', payload);
     return res.data;
   },
-  chatWithAnalyst: async (message, history = [], context = {}) => {
-    const res = await client.post('/chat', { message, history, context });
+  chatWithAnalyst: async (message, sessionId = null, history = [], context = {}) => {
+    const res = await client.post('/chat', { message, session_id: sessionId, history, context });
+    return res.data;
+  },
+  getChatSessions: async () => {
+    const res = await client.get('/chat/sessions');
+    return res.data;
+  },
+  createChatSession: async (title = 'New Investigation') => {
+    const res = await client.post('/chat/sessions', { title });
+    return res.data;
+  },
+  getSessionMessages: async (sessionId) => {
+    const res = await client.get(`/chat/sessions/${sessionId}`);
+    return res.data;
+  },
+  deleteChatSession: async (sessionId) => {
+    const res = await client.delete(`/chat/sessions/${sessionId}`);
+    return res.data;
+  },
+  renameChatSession: async (sessionId, title) => {
+    const res = await client.put(`/chat/sessions/${sessionId}`, { title });
     return res.data;
   },
 

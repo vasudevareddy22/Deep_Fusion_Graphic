@@ -78,23 +78,91 @@ def explain_threat():
     explanation = threat_explainer.explain(default_payload)
     return jsonify({'success': True, 'explanation': explanation, 'incident': default_payload}), 200
 
+def _get_current_user_email() -> str:
+    """Extract user identifier from Authorization header for chat session persistence."""
+    try:
+        from flask import has_request_context
+        if not has_request_context():
+            return 'admin@deepfusionguard.com'
+        auth_header = request.headers.get('Authorization', '')
+        token = auth_header.replace('Bearer ', '').strip()
+        if not token or token in ('dfg-jwt-session-token-admin-soc-verified', 'demo-token'):
+            return 'admin@deepfusionguard.com'
+        parts = token.split('-')
+        if len(parts) >= 4:
+            user_id = parts[3]
+            conn = get_db_connection()
+            row = conn.execute('SELECT email, mobile FROM users WHERE id = ?', (user_id,)).fetchone()
+            conn.close()
+            if row:
+                return row['email'] or row['mobile'] or 'admin@deepfusionguard.com'
+    except Exception:
+        pass
+    return 'admin@deepfusionguard.com'
+
+# ── Chat Session Management Endpoints ─────────────────────────────────────────
+
+@explain_bp.route('/api/chat/sessions', methods=['GET', 'POST'])
+@explain_bp.route('/chat/sessions', methods=['GET', 'POST'])
+def handle_chat_sessions():
+    user_email = _get_current_user_email()
+
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        title = data.get('title', 'New Investigation')
+        session = soc_chatbot.create_session(user_email, title)
+        return jsonify({'success': True, 'session': session}), 201
+
+    sessions = soc_chatbot.get_user_sessions(user_email)
+    return jsonify({'success': True, 'sessions': sessions}), 200
+
+@explain_bp.route('/api/chat/sessions/<session_id>', methods=['GET', 'DELETE', 'PUT'])
+@explain_bp.route('/chat/sessions/<session_id>', methods=['GET', 'DELETE', 'PUT'])
+def handle_single_chat_session(session_id):
+    user_email = _get_current_user_email()
+
+    if request.method == 'DELETE':
+        soc_chatbot.delete_session(session_id, user_email)
+        return jsonify({'success': True, 'message': 'Session deleted'}), 200
+
+    if request.method == 'PUT':
+        data = request.get_json(silent=True) or {}
+        new_title = data.get('title', 'Investigation')
+        soc_chatbot.rename_session(session_id, new_title)
+        return jsonify({'success': True, 'message': 'Session renamed', 'title': new_title}), 200
+
+    messages = soc_chatbot.get_session_messages(session_id)
+    return jsonify({'success': True, 'session_id': session_id, 'messages': messages}), 200
+
+# ── Main Conversational Chat Endpoint ─────────────────────────────────────────
+
 @explain_bp.route('/api/chat', methods=['POST'])
 @explain_bp.route('/chat', methods=['POST'])
 def chat_with_soc_analyst():
     """
-    ChatGPT-Powered SOC Analyst Chatbot Endpoint
-    Accepts: { 'message': str, 'history': list, 'context': dict }
-    Returns: { 'success': True, 'reply': str, 'suggested_prompts': list, 'engine': str, 'live_context': dict }
+    ChatGPT-Powered SOC Analyst Chatbot Endpoint with SQLite Persistence
+    Accepts: { 'message': str, 'session_id': str, 'history': list, 'context': dict }
+    Returns: { 'success': True, 'session_id': str, 'reply': str, 'suggested_prompts': list, 'engine': str, 'live_context': dict }
     """
     try:
         data = request.get_json(silent=True) or {}
         user_message = data.get('message', '')
+        session_id = data.get('session_id')
         history = data.get('history', [])
         context = data.get('context', {})
+        user_email = _get_current_user_email()
 
-        result = soc_chatbot.chat(user_message, conversation_history=history, context=context)
+        result = soc_chatbot.chat(
+            user_message=user_message,
+            session_id=session_id,
+            user_email=user_email,
+            conversation_history=history,
+            context=context
+        )
+
         return jsonify({
             'success': True,
+            'session_id': result.get('session_id'),
             'reply': result['reply'],
             'suggested_prompts': result.get('suggested_prompts', []),
             'engine': result.get('engine', 'DeepFusionGuard SOC Engine'),
@@ -106,4 +174,5 @@ def chat_with_soc_analyst():
             'error': str(e),
             'reply': f"An error occurred while communicating with the SOC Analyst Chatbot: {e}"
         }), 500
+
 

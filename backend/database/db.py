@@ -110,6 +110,32 @@ def init_db():
         )
     ''')
 
+    # Chat Sessions Table (ChatGPT / Claude style multi-session persistent chats)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chat_sessions (
+            id TEXT PRIMARY KEY,
+            user_email TEXT NOT NULL,
+            title TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Chat Messages Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            engine TEXT DEFAULT 'DeepFusionGuard SOC Engine',
+            suggested_prompts_json TEXT DEFAULT '[]',
+            timestamp TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+        )
+    ''')
+
     # Seed Master Admin User if not present
     cursor.execute('SELECT id FROM users WHERE LOWER(email) = ?', ('vasudevareddyeevuri@gmail.com',))
     if not cursor.fetchone():
