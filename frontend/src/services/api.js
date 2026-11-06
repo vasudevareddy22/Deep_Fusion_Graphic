@@ -138,9 +138,13 @@ export const api = {
     return res.data;
   },
 
-  // ── AI Threat Explanation ──────────────────────────────────────────────────
+  // ── AI Threat Explanation & ChatGPT Analyst ────────────────────────────────
   explainThreat: async (payload) => {
     const res = await client.post('/explain', payload);
+    return res.data;
+  },
+  chatWithAnalyst: async (message, history = [], context = {}) => {
+    const res = await client.post('/chat', { message, history, context });
     return res.data;
   },
 

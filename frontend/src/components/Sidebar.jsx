@@ -9,7 +9,9 @@ import {
   FileText, 
   Settings, 
   ShieldAlert,
-  Sliders
+  Sliders,
+  MessageSquareCode,
+  Sparkles
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -18,6 +20,7 @@ export const Sidebar = () => {
     { to: '/detect', label: 'Attack Detection', icon: Crosshair },
     { to: '/graph', label: 'Network Graph', icon: Network },
     { to: '/analysis', label: 'AI Threat Analysis', icon: Bot },
+    { to: '/chatbot', label: 'ChatGPT SOC Analyst', icon: MessageSquareCode, badge: 'AI' },
     { to: '/history', label: 'Detection History', icon: History },
     { to: '/reports', label: 'Executive Reports', icon: FileText },
     { to: '/settings', label: 'Engine Settings', icon: Sliders },
@@ -47,7 +50,12 @@ export const Sidebar = () => {
                   }
                 >
                   <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && (
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40 shadow-xs">
+                      {item.badge}
+                    </span>
+                  )}
                 </NavLink>
               );
             })}

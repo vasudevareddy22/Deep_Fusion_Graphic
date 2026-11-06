@@ -9,6 +9,7 @@ if str(BASE_DIR) not in sys.path:
 from flask import Blueprint, request, jsonify
 from backend.database.db import get_db_connection
 from backend.llm.explain import threat_explainer
+from backend.llm.chatbot import soc_chatbot
 
 explain_bp = Blueprint('explain', __name__)
 
@@ -76,3 +77,33 @@ def explain_threat():
     }
     explanation = threat_explainer.explain(default_payload)
     return jsonify({'success': True, 'explanation': explanation, 'incident': default_payload}), 200
+
+@explain_bp.route('/api/chat', methods=['POST'])
+@explain_bp.route('/chat', methods=['POST'])
+def chat_with_soc_analyst():
+    """
+    ChatGPT-Powered SOC Analyst Chatbot Endpoint
+    Accepts: { 'message': str, 'history': list, 'context': dict }
+    Returns: { 'success': True, 'reply': str, 'suggested_prompts': list, 'engine': str, 'live_context': dict }
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        user_message = data.get('message', '')
+        history = data.get('history', [])
+        context = data.get('context', {})
+
+        result = soc_chatbot.chat(user_message, conversation_history=history, context=context)
+        return jsonify({
+            'success': True,
+            'reply': result['reply'],
+            'suggested_prompts': result.get('suggested_prompts', []),
+            'engine': result.get('engine', 'DeepFusionGuard SOC Engine'),
+            'live_context': result.get('live_context', {})
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'reply': f"An error occurred while communicating with the SOC Analyst Chatbot: {e}"
+        }), 500
+

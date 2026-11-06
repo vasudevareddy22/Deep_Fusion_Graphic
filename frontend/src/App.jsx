@@ -15,6 +15,8 @@ import AIThreatAnalysis from './pages/AIThreatAnalysis';
 import DetectionHistory from './pages/DetectionHistory';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import ChatbotPage from './pages/ChatbotPage';
+import FloatingChatbot from './components/FloatingChatbot';
 
 // Protected Route Wrapper
 const ProtectedLayout = () => {
@@ -40,7 +42,7 @@ const ProtectedLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative">
       <Navbar onTriggerDemo={handleTriggerDemo} isDemoLoading={isDemoLoading} />
       <div className="flex flex-1">
         <Sidebar />
@@ -50,6 +52,7 @@ const ProtectedLayout = () => {
             <Route path="/detect" element={<AttackDetection />} />
             <Route path="/graph" element={<NetworkGraph />} />
             <Route path="/analysis" element={<AIThreatAnalysis />} />
+            <Route path="/chatbot" element={<ChatbotPage />} />
             <Route path="/history" element={<DetectionHistory />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
@@ -57,6 +60,8 @@ const ProtectedLayout = () => {
           </Routes>
         </main>
       </div>
+      {/* Floating ChatGPT SOC Analyst Chatbot accessible across all pages */}
+      <FloatingChatbot />
     </div>
   );
 };
