@@ -168,6 +168,28 @@ export const api = {
     return res.data;
   },
 
+  // ── Live Real-Time Network Sniffer ─────────────────────────────────────────
+  getLiveStatus: async () => {
+    const res = await client.get('/live/status');
+    return res.data;
+  },
+  startLiveSniffer: async (interval = 2.0) => {
+    const res = await client.post('/live/start', { interval });
+    return res.data;
+  },
+  stopLiveSniffer: async () => {
+    const res = await client.post('/live/stop');
+    return res.data;
+  },
+  getLiveFeed: async (limit = 50, threatOnly = false) => {
+    const res = await client.get(`/live/feed?limit=${limit}&threat_only=${threatOnly}`);
+    return res.data;
+  },
+  injectLiveTestAttack: async (attackType = 'DoS') => {
+    const res = await client.post('/live/inject', { attack_type: attackType });
+    return res.data;
+  },
+
   // ── Detection History ──────────────────────────────────────────────────────
   getHistory: async (params = {}) => {
     const res = await client.get('/history', { params });

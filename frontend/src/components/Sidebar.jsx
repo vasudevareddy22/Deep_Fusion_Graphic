@@ -11,12 +11,14 @@ import {
   ShieldAlert,
   Sliders,
   MessageSquareCode,
-  Sparkles
+  Sparkles,
+  Radio
 } from 'lucide-react';
 
 export const Sidebar = () => {
   const navItems = [
     { to: '/', label: 'SOC Dashboard', icon: LayoutDashboard },
+    { to: '/live', label: 'Live Network Sniffer', icon: Radio, badge: 'LIVE' },
     { to: '/detect', label: 'Attack Detection', icon: Crosshair },
     { to: '/graph', label: 'Network Graph', icon: Network },
     { to: '/analysis', label: 'AI Threat Analysis', icon: Bot },

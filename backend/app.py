@@ -18,6 +18,7 @@ from backend.routes.detection import detection_bp
 from backend.routes.graph import graph_bp
 from backend.routes.explain import explain_bp
 from backend.routes.report import report_bp
+from backend.routes.live import live_bp
 
 class PathRewriteMiddleware:
     """
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(graph_bp)
     app.register_blueprint(explain_bp)
     app.register_blueprint(report_bp)
+    app.register_blueprint(live_bp)
 
     @app.route('/api/health', methods=['GET'])
     @app.route('/health', methods=['GET'])

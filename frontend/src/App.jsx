@@ -17,6 +17,7 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import ChatbotPage from './pages/ChatbotPage';
 import FloatingChatbot from './components/FloatingChatbot';
+import LiveNetworkMonitor from './pages/LiveNetworkMonitor';
 
 // Protected Route Wrapper
 const ProtectedLayout = () => {
@@ -49,6 +50,7 @@ const ProtectedLayout = () => {
         <main className="flex-1 overflow-y-auto bg-[#070B14]">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/live" element={<LiveNetworkMonitor />} />
             <Route path="/detect" element={<AttackDetection />} />
             <Route path="/graph" element={<NetworkGraph />} />
             <Route path="/analysis" element={<AIThreatAnalysis />} />
