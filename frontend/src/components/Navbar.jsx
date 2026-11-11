@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Shield, Radio, PlayCircle, LogOut, User, Database, Download, Users, Lock } from 'lucide-react';
 import { authService } from '../services/auth';
 import { api } from '../services/api';
@@ -69,6 +70,17 @@ export const Navbar = ({ onTriggerDemo, isDemoLoading }) => {
 
         {/* ── Right Controls ── */}
         <div className="flex items-center gap-2.5 ml-auto">
+
+          {/* Live Sniffer Quick Link */}
+          <Link
+            to="/live"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-950/70 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-500/50 hover:border-cyan-400 transition-all cursor-pointer shadow-xs shadow-cyan-500/20"
+            title="Real-time live host network sniffer & attack detection"
+          >
+            <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+            <span className="hidden sm:inline">Live Sniffer</span>
+            <span className="px-1.5 py-0.2 rounded text-[9px] bg-emerald-500/20 text-emerald-300 font-mono font-bold border border-emerald-500/40">LIVE</span>
+          </Link>
 
           {/* Demo data trigger */}
           {onTriggerDemo && (
