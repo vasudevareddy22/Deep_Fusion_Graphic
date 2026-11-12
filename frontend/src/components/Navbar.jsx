@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Radio, PlayCircle, LogOut, User, Database, Download, Users, Lock } from 'lucide-react';
+import { Shield, Radio, PlayCircle, LogOut, User, Database, Download, Users, Lock, Film } from 'lucide-react';
 import { authService } from '../services/auth';
 import { api } from '../services/api';
 import CustomerDirectoryModal from './CustomerDirectoryModal';
+import VideoWalkthroughModal from './VideoWalkthroughModal';
 
 // Auth method badge colours in cyber obsidian theme
 const AUTH_BADGE = {
@@ -15,6 +16,7 @@ const AUTH_BADGE = {
 
 export const Navbar = ({ onTriggerDemo, isDemoLoading }) => {
   const [showCustomersModal, setShowCustomersModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const user = authService.getUser() || { name: 'Customer User', role: 'Customer', auth_provider: 'EMAIL_OTP', email: '' };
 
   // Strict check: Only Vasudevareddyeevuri@gmail.com is authorized as Super Admin
@@ -81,6 +83,16 @@ export const Navbar = ({ onTriggerDemo, isDemoLoading }) => {
             <span className="hidden sm:inline">Live Sniffer</span>
             <span className="px-1.5 py-0.2 rounded text-[9px] bg-emerald-500/20 text-emerald-300 font-mono font-bold border border-emerald-500/40">LIVE</span>
           </Link>
+
+          {/* 4-Minute Interactive Video Demonstration & Voiceover Tour */}
+          <button
+            onClick={() => setShowVideoModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-950/80 via-indigo-950/80 to-blue-950/80 hover:from-purple-900/90 hover:to-blue-900/90 text-purple-200 hover:text-white border border-purple-500/40 hover:border-purple-300 transition-all cursor-pointer shadow-xs shadow-purple-500/20"
+            title="Open 4-minute interactive video demonstration & voiceover player"
+          >
+            <Film className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+            <span className="hidden sm:inline">4-Min Video Demo</span>
+          </button>
 
           {/* Demo data trigger */}
           {onTriggerDemo && (
@@ -158,6 +170,12 @@ export const Navbar = ({ onTriggerDemo, isDemoLoading }) => {
           onClose={() => setShowCustomersModal(false)}
         />
       )}
+
+      {/* 4-Minute Interactive Video Demonstration & Voiceover Player */}
+      <VideoWalkthroughModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+      />
     </>
   );
 };
