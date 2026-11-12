@@ -53,3 +53,5 @@ dist-ssr/
 # Temporary / Uploads
 backend/uploads/*
 !backend/uploads/.gitkeep
+video_generator/output/
+
